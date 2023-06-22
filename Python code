@@ -14,7 +14,7 @@ end_date = pd.to_datetime('2023-05-31')
 dates = pd.date_range(start=start_date, end=end_date, freq='M')
 
 # Generate sales values with seasonality and increasing trend
-seasonality = np.array([0, 0, 0, 1, 1, 1, 0, 0]) * 27 # Higher sales during May to July
+seasonality = np.array([0, 0, 0, 0.5, 1, 1, 1, 1, 0.5, 0, 0, 0]) * 27 # Higher sales during May to July
 trend = np.linspace(0, 1, len(dates))
 starting_sales = 30
 sales = trend * 42 + starting_sales + np.tile(seasonality, len(dates) // len(seasonality) + 1)[:len(dates)]
@@ -32,3 +32,4 @@ print(df.head())
 
 #Get the data to excel
 df.to_excel('fake_data.xlsx', index=False)
+
