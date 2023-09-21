@@ -7,7 +7,6 @@ library(dplyr)
 library(lubridate)
 library(zoo)
 library(forecast)
-library()
 sales_data_spline <- read_xlsx("fake_sales_data.xlsx")
 
 # Replace zeros with NA
@@ -15,6 +14,9 @@ sales_data_spline$Sales[sales_data_spline$Sales == 0] <- NA
 
 # Use na.spline() to fill in the missing values using spline interpolation
 sales_data_spline$Sales <- na.spline(sales_data_spline$Sales)
+
+#round data 
+sales_data_spline$Sales <- round(sales_data_spline$Sales)
 
 print(sales_data_spline)
 
@@ -92,6 +94,8 @@ sales_data_polynomial$Sales[is.na(sales_data_polynomial$Sales)] <- sales_data_po
 # Remove the Predicted_Sales column
 sales_data_polynomial$Predicted_Sales <- NULL
 
+#round Data
+sales_data_polynomial$Sales <- round(sales_data_polynomial$Sales)
 print(sales_data_polynomial)
 
 
@@ -99,12 +103,46 @@ print(sales_data_polynomial)
 sales_data_polynomial$Days <- NULL
 
 # Create a new data frame that combines both 'sales_data_polynomial' and 'sales_data_spline'
+#add column with missing values
+sales_data_withNA <- read_xlsx("fake_sales_data.xlsx")
+# Replace zeros with NA
+sales_data_withNA$Sales[sales_data_withNA$Sales == 0] <- NA
+
+#Plotting the graph 
+Date <- sales_data$Date
+
+
+data_for_plot_deterministicINT <- data.frame(
+  Date = Date, 
+  sales_data_withNA = ts(sales_data_withNA$Sales),
+  polynomial_interpolation = ts(sales_data_polynomial$Sales),
+  spline_interpolation = ts(sales_data_spline$Sales)
+)
+
+# Convert Date to a Date object, if it's not already
+data_for_plot_deterministicINT$Date <- as.Date(data_for_plot_deterministicINT$Date)
+
+
+# Create a data frame with only the interpolated values 
+data_only_interpolated <- data_for_plot_deterministicINT %>%
+  filter(is.na(sales_data_withNA)) 
+
+ggplot(data_only_interpolated, aes(x = Date)) +
+  geom_line(aes(y = polynomial_interpolation, color = "Polynomial Interpolation")) +
+  geom_line(aes(y = spline_interpolation, color = "Spline Interpolation")) +
+  theme_minimal() +
+  labs(color = "Method") + ylab("Sales") + ggtitle("Polynomial vs. Spline interpolation")
+theme(legend.position="bottom")
+
+
+#### another way to plot
+sales_data_polynomial$Days <- NULL
+
+# Create a new data frame that combines both 'sales_data_polynomial' and 'sales_data_spline'
 combined_data <- rbind(
   cbind(sales_data_polynomial, Source = "sales_data_polynomial"),
   cbind(sales_data_spline, Source = "sales_data_spline")
 )
-
-
 monthly_sales_interpolation <- combined_data %>%
   mutate(MonthYear = format(Date, "%b-%Y")) %>%
   group_by(MonthYear, Source) %>%
@@ -123,8 +161,8 @@ ggplot(monthly_sales_interpolation, aes(x = Date, y = TotalSales, group = Source
         axis.text = element_text(size = 12)) 
 
 
-library("writexl")
-write_xlsx(combined_data,"C:\\Users\\User\\Desktop\\TEZA\\interp_combined_data2.xlsx")
+#library("writexl")
+#write_xlsx(combined_data,"C:\\Users\\User\\Desktop\\TEZA\\interp_combined_data2.xlsx")
 
 
 
