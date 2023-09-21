@@ -44,3 +44,56 @@ for (i in 1:nrow(sales_data)) {
     sales_data$Sales2[i] <- calculate_approximate_demand(sales_data, i)
   }
 }
+
+
+#library("writexl")
+#write_xlsx(sales_data,"C:\\Users\\User\\Desktop\\TEZA\\data_from_R.xlsx")
+#Round the Sales, since we can not sell half of an item :)
+sales_data$Sales <- round(sales_data$Sales)
+
+#remove stockout column since we do not need it anymore
+sales_data$stockout <- NULL
+
+#plot the the new data
+# Create a Month-Year column for grouping
+sales_data$MonthYear <- format(sales_data$Date, "%b-%Y")
+
+# Plot the graph
+monthly_sales <- sales_data %>%
+  mutate(MonthYear = format(Date, "%b-%Y")) %>%
+  group_by(MonthYear) %>%
+  summarise(Date = min(Date), TotalSales = sum(Sales)) %>%
+  arrange(Date)
+
+monthly_sales <- data.frame(monthly_sales)
+monthly_sales$MonthYear <- as.Date(sales_data$Date)
+# Plot the graph
+ggplot(monthly_sales, aes(x = Date, y = TotalSales, group = 1)) +
+  geom_line(color = "steelblue", size = 1, alpha = 0.8) +
+  geom_smooth(color = "steelblue", size = 1, alpha = 0.3, span = 0.3) +
+  #scale_x_discrete(breaks = monthly_sales$MonthYear[seq(1, nrow(monthly_sales), 3)]) +
+  labs(x = "Monthly sales", y = "Total Sales", title = "Monthly Sales") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12))
+
+####2.separate data into train and test set
+#load libraries 
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(forecast)
+# Convert the "Date" column to a Date object
+sales_data$Date <- as.Date(sales_data$Date)
+
+
+# Split the data
+train_data <- subset(sales_data, Date < as.Date("2023-01-01"))
+test_data <- subset(sales_data, Date >= as.Date("2023-01-01"))
+
+# Create a time series object with a yearly seasonality (365 days)
+ts_training_data <- ts(train_data$Sales, frequency = 365)
+ggtsdisplay(ts_training_data)
