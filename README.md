@@ -25,4 +25,26 @@ I have now applied two models of deterministic interpolation: Classic polynomial
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/d71dafb3-bfc0-4aa9-ac27-2735a7e1b996)
 
 
+####Aplication of different interpolation techniques 
+
+![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/55b66b2c-1baa-46a0-9825-a80662c50c8f)
+
+
+###This is how HoltWinters and SARIMA forecasting techniques behaved when using data from different approximation techniques  
+
+![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/280766ea-78d1-4425-a302-422e731ba119)
+
+
+###Comparison of forecast accuracy between least and most accurate approximation technique
+
+![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/1c1d9e91-cb4a-46bf-b013-54ba282e8db5)
+
+
+In the practical part of this master's thesis, our objective was to demonstrate the process of effectively predicting demand based on sales data, particularly in instances of stockouts. We successfully implemented a several approximation techniques and then we applied some forecasting techniques to those “fixed” data. All of them showed really good results.
+
+Drawing conclusions from our research, the approximation techniques showcased remarkable performance, with all reporting an accuracy surpassing 90%. Some even reached an accuracy of approximately 97%. Two methods stood out notably: the Holt-Winters method (also termed as 'triple exponential smoothing') and the SARIMA model which was chosen by auto.arima function from R. Their efficacy was anticipated given the presence of both trend and seasonality in our data. Our research further showed that we can rely on selected approximation techniques for data characterized by seasonality and trend. Consequently, this led to precise forecasting when combined with apt methods such as SARIMA and Holt-Winters. We choose our approximation techniques based on this specific dataset and we choose only those that can handle seasonality patterns and trend. That is why every approximation techniques have similar result we do not have situations where some of the approximation techniques got completely false results.
+
+A deeper dive into our techniques revealed that the Holt-Winters method had the highest accuracy, particularly in the forecasting part where there was no seasonality present. However, it did fall short in capturing data from June to July, where seasonality came in play. We attribute our high degree of success to a profound comprehension and thorough analysis of our data, enabling the accurate application of both forecasting and approximation techniques.
+
+For businesses to achieve optimal demand forecasting, a comprehensive understanding of their data is crucial. Recognizing elements such as seasonality and when does it occur, trend magnitude, and similar is essential. For instance, while auto.arima displayed significant success, it was not as easy as just applying the code to the data. When deployed with our approximated data without specific frequency, it failed to capture seasonality, choosing a regular ARIMA model. Once we specified its frequency parameters, its performance dramatically improved.
 
