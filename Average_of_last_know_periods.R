@@ -1,3 +1,46 @@
+setwd("C:/Users/User/teza")
+
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+library(dplyr)
+sales_data <- read_xlsx("fake_sales_data.xlsx")
+
+
+# Create a Month-Year column for grouping
+sales_data$MonthYear <- format(sales_data$Date, "%b-%Y")
+
+# Plot the graph
+monthly_sales <- sales_data %>%
+  mutate(MonthYear = format(Date, "%b-%Y")) %>%
+  group_by(MonthYear) %>%
+  summarise(Date = min(Date), TotalSales = sum(Sales)) %>%
+  arrange(Date)
+
+monthly_sales <- data.frame(monthly_sales)
+monthly_sales$MonthYear <- as.Date(sales_data$Date)
+# Plot the graph
+ggplot(monthly_sales, aes(x = Date, y = TotalSales, group = 1)) +
+  geom_line(color = "steelblue", size = 1, alpha = 0.8) +
+  geom_smooth(color = "steelblue", size = 1, alpha = 0.3, span = 0.3) +
+  #scale_x_discrete(breaks = monthly_sales$MonthYear[seq(1, nrow(monthly_sales), 3)]) +
+  labs(x = "Monthly sales", y = "Total Sales", title = "Monthly Sales") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12))
+
+
+
+####Approximation technique <- "Average of last know periods" 
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(zoo)
+# Load your data (replace 'fake_sales_data.xlsx' with your actual data file)
 sales_data <- read_xlsx("fake_sales_data.xlsx")
 
 # Create a binary column indicating stockouts (1 for stockout, 0 for no stockout)
@@ -37,14 +80,13 @@ calculate_approximate_demand <- function(data, stockout_index) {
   
   return(average_sales)
 }
-sales_data$Sales2 <- sales_data$Sales
+#sales_data$Sales_adjusted <- sales_data$Sales
 # Loop through each row of the data frame to calculate the approximate demand
 for (i in 1:nrow(sales_data)) {
   if (sales_data$stockout[i] == 1) {
-    sales_data$Sales2[i] <- calculate_approximate_demand(sales_data, i)
+    sales_data$Sales[i] <- calculate_approximate_demand(sales_data, i)
   }
 }
-
 
 #library("writexl")
 #write_xlsx(sales_data,"C:\\Users\\User\\Desktop\\TEZA\\data_from_R.xlsx")
