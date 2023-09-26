@@ -13,7 +13,7 @@ sales_data_spline <- read_xlsx("fake_sales_data.xlsx")
 sales_data_spline$Sales[sales_data_spline$Sales == 0] <- NA
 
 # Use na.spline() to fill in the missing values using spline interpolation
-sales_data_spline$Sales <- na.spline(sales_data_spline$Sales)
+sales_data_spline$Sales <- na.spline(ts(sales_data_spline$Sales))
 
 #round data 
 sales_data_spline$Sales <- round(sales_data_spline$Sales)
@@ -58,7 +58,8 @@ sales_data_polynomial$Sales[sales_data_polynomial$Sales == 0] <- NA
 
 # Create a new column Days which will be used for the interpolation (used as predictor variable in the model)
 sales_data_polynomial$Days <- 1:nrow(sales_data_polynomial)
-
+#convert to time series
+sales_data_polynomial$Sales <- ts(sales_data_polynomial$Sales)
 #Firstly, we need to decide on degree of polynomial which we will use. We do it in following way:
 # Initialize variables to store the results
 best_degree <- 0
