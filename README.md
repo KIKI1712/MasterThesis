@@ -25,17 +25,17 @@ I have now applied two models of deterministic interpolation: Classic polynomial
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/d71dafb3-bfc0-4aa9-ac27-2735a7e1b996)
 
 
-####Aplication of different interpolation techniques 
+#### Aplication of different interpolation techniques 
 
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/55b66b2c-1baa-46a0-9825-a80662c50c8f)
 
 
-###This is how HoltWinters and SARIMA forecasting techniques behaved when using data from different approximation techniques  
+### This is how HoltWinters and SARIMA forecasting techniques behaved when using data from different approximation techniques  
 
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/280766ea-78d1-4425-a302-422e731ba119)
 
 
-###Comparison of forecast accuracy between least and most accurate approximation technique
+### Comparison of forecast accuracy between least and most accurate approximation technique
 
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/1c1d9e91-cb4a-46bf-b013-54ba282e8db5)
 
