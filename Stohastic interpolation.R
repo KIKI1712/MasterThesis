@@ -31,11 +31,12 @@ summary(Sales_ts)
 summary(Sales)
 
 # 1. Missing Value Imputation by Weighted Moving Average
-imputed_ma <- na_ma(Sales, k=6, weighting = "exponential")
+#imputed_ma <- na_ma(Sales, k=6, weighting = "exponential")
 imputed_ma_ts <- na_ma(Sales_ts, k=6, weighting = "exponential")
 summary(imputed_ma_ts)
 summary(imputed_ma)
 
+setwd("C:/Users/User/teza")
 # 2. Missing Value Imputation by Kalman Smoothing with StructTS
 #imputed_kalman_struct <- na_kalman(Sales, model = "StructTS")
 imputed_kalman_struct_ts <- na_kalman(Sales_ts, model = "StructTS")
@@ -88,6 +89,7 @@ imputed_seadec_interpolation <- na_seadec(Sales_ts,find_frequency = TRUE, algori
 Date <- sales_data$Date
 
 
+
 data_for_plot <- data.frame(
   Date = Date, 
   sales_with_na = ts(sales_data$Sales),
@@ -112,7 +114,7 @@ data_interpolated <- data_for_plot %>%
 
 write_xlsx(data_interpolated,"C:\\Users\\User\\Desktop\\TEZA\\data_interpolated.xlsx")
 
-###ROUNDAJ PODATKE PA PLOTAJ GRPAHS
+
 
 ggplot(data_interpolated, aes(x = Date)) +
   geom_line(aes(y = imputed_ma_ts, color = "MA TS")) +
@@ -126,3 +128,50 @@ ggplot(data_interpolated, aes(x = Date)) +
   labs(color = "Method") + ylab("Sales") + ggtitle("Comparison of different interpolation techniques")
   theme(legend.position="bottom")
 
+
+
+
+
+
+
+
+
+
+###ako budem koristio
+
+
+
+
+
+
+
+
+# Group by Month and Year
+monthly_data <- data_for_plot %>%
+  mutate(MonthYear = format(Date, "%b-%Y")) %>%
+  group_by(MonthYear) %>%
+  summarise(
+    Date = min(Date),
+    Monthly_MA_TS = sum(imputed_ma_ts),
+    Monthly_Kalman_Struct_TS = sum(imputed_kalman_struct_ts),
+    Monthly_Kalman_ARIMA_TS = sum(imputed_kalman_arima_ts),
+    Monthly_Seadec_MA = sum(imputed_seadec_ma),
+    Monthly_Seadec_Kalman_Struct = sum(imputed_seadec_kalman_struct),
+    Monthly_Seadec_Kalman_ARIMA = sum(imputed_seadec_kalman_arima),
+    Monthly_Seadec_Interpolation = sum(imputed_seadec_interpolation)
+  ) %>%
+  arrange(Date)
+
+p <- ggplot(monthly_data, aes(x = Date)) +
+  geom_line(aes(y = Monthly_MA_TS, color = "MA TS")) +
+  geom_line(aes(y = Monthly_Kalman_Struct_TS, color = "Kalman Struct TS")) +
+  geom_line(aes(y = Monthly_Kalman_ARIMA_TS, color = "Kalman ARIMA TS")) +
+  geom_line(aes(y = Monthly_Seadec_MA, color = "Seadec MA")) +
+  geom_line(aes(y = Monthly_Seadec_Kalman_Struct, color = "Seadec Kalman Struct")) +
+  geom_line(aes(y = Monthly_Seadec_Kalman_ARIMA, color = "Seadec Kalman ARIMA")) +
+  geom_line(aes(y = Monthly_Seadec_Interpolation, color = "Seadec Interpolation")) +
+  theme_minimal() +
+  labs(color = "Method") +
+  theme(legend.position="bottom")
+
+print(p)
