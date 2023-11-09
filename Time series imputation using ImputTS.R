@@ -1,3 +1,4 @@
+setwd("C:/Users/User/teza")
 library(ggplot2)
 library(readxl)
 library(tidyverse)
@@ -31,12 +32,41 @@ summary(Sales_ts)
 summary(Sales)
 
 # 1. Missing Value Imputation by Weighted Moving Average
-#imputed_ma <- na_ma(Sales, k=6, weighting = "exponential")
-imputed_ma_ts <- na_ma(Sales_ts, k=6, weighting = "exponential")
-summary(imputed_ma_ts)
-summary(imputed_ma)
+train_data <- subset(sales_data, Date < as.Date("2023-01-01"))
+test_data <- subset(sales_data, Date >= as.Date("2023-01-01"))
+min_k = 4
+max_k = 50
+results <- list()
+best_metric <- Inf
+best_k <- NA
+# Loop through different k values
+for (k in seq(from = min_k, to = max_k, by = 1)) {
+  
+  # Impute missing values
+  imputed_data <- na_ma(train_data$Sales, k = 100, weighting = "exponential")
+  
+  # Forecast using imputed data
+  hw_model <- HoltWinters(ts(imputed_data, frequency = 365), alpha = 1, beta = 1, gamma = 1)
+  hw_forecast <- forecast(hw_model, h = nrow(test_data))
+  
+  # Compare the forecasted values with the actual test data
+  metric <- mae(test_data$Sales, hw_forecast$mean)
+  
+  # Check if this metric is the best (smallest) one so far
+  if (metric < best_metric) {
+    best_metric <- metric
+    best_k <- k
+  }
+}
 
-setwd("C:/Users/User/teza")
+print(paste("The best k value is:", best_k))
+print(paste("With an MAE of:", best_metric))
+
+#imputed_ma <- na_ma(Sales, k=6, weighting = "exponential")
+imputed_ma_ts <- na_ma(Sales_ts, k=4, weighting = "exponential")
+summary(imputed_ma_ts)
+
+
 # 2. Missing Value Imputation by Kalman Smoothing with StructTS
 #imputed_kalman_struct <- na_kalman(Sales, model = "StructTS")
 imputed_kalman_struct_ts <- na_kalman(Sales_ts, model = "StructTS")
@@ -62,7 +92,7 @@ imputed_kalman_arima_ts <- ts(imputed_kalman_arima_ts$x)
 #summary(imputed_kalman_arima_ts)
 
 # 4. Seasonally Decomposed Missing Value Imputation with na_ma
-imputed_seadec_ma <- na_seadec(Sales_ts,find_frequency = TRUE, algorithm = "ma", k=6, weighting = "exponential")
+imputed_seadec_ma <- na_seadec(Sales_ts,find_frequency = TRUE, algorithm = "ma", k=4, weighting = "exponential")
 
 # 5. Seasonally Decomposed Missing Value Imputation with Kalman StructTS
 #imputed_seadec_kalman_struct <- na_seadec(Sales_ts, algorithm = "kalman", model = "StructTS")
@@ -81,9 +111,6 @@ imputed_seadec_kalman_arima <- na_seadec(Sales_ts, find_frequency = TRUE, algori
 imputed_seadec_kalmanarima_excel <- as.data.frame(imputed_seadec_kalman_arima)
 write_xlsx(imputed_seadec_kalmanarima_excel,"C:\\Users\\User\\Desktop\\TEZA\\imputed_seadec_kalman_arima.xlsx")
 
-# 7. Seasonally Decomposed Missing Value Imputation with Interpolation
-imputed_seadec_interpolation <- na_seadec(Sales_ts,find_frequency = TRUE, algorithm = "interpolation", option = "spline")
-
 
 #Plotting the graph 
 Date <- sales_data$Date
@@ -98,8 +125,8 @@ data_for_plot <- data.frame(
   imputed_kalman_arima_ts = round(imputed_kalman_arima_ts),
   imputed_seadec_ma = round(imputed_seadec_ma),
   imputed_seadec_kalman_struct = round(imputed_seadec_kalman_struct),
-  imputed_seadec_kalman_arima = round(imputed_seadec_kalman_arima),
-  imputed_seadec_interpolation = round(imputed_seadec_interpolation)
+  imputed_seadec_kalman_arima = round(imputed_seadec_kalman_arima)
+  #imputed_seadec_interpolation = round(imputed_seadec_interpolation)
 )
 
 # Convert Date to a Date object, if it's not already
@@ -117,15 +144,14 @@ write_xlsx(data_interpolated,"C:\\Users\\User\\Desktop\\TEZA\\data_interpolated.
 
 
 ggplot(data_interpolated, aes(x = Date)) +
-  geom_line(aes(y = imputed_ma_ts, color = "MA TS")) +
+  geom_line(aes(y = imputed_ma_ts, color = "Moving Average TS")) +
   geom_line(aes(y = imputed_kalman_struct_ts, color = "Kalman Struct TS")) +
-  geom_line(aes(y = imputed_kalman_arima_ts, color = "Kalman ARIMA TS")) +
-  geom_line(aes(y = imputed_seadec_ma, color = "Seadec MA")) +
-  geom_line(aes(y = imputed_seadec_kalman_struct, color = "Seadec Kalman Struct")) +
+  geom_line(aes(y = imputed_kalman_arima_ts, color = "Kalman ARIMA")) +
+  geom_line(aes(y = imputed_seadec_ma, color = "Seadec Moving Average")) +
+  geom_line(aes(y = imputed_seadec_kalman_struct, color = "Seadec Kalman Struct TS")) +
   geom_line(aes(y = imputed_seadec_kalman_arima, color = "Seadec Kalman ARIMA")) +
-  geom_line(aes(y = imputed_seadec_interpolation, color = "Seadec Interpolation")) +
   theme_minimal() +
-  labs(color = "Method") + ylab("Sales") + ggtitle("Comparison of different interpolation techniques")
+  labs(color = "Method") + ylab("Sales") + ggtitle("Comparison of different methods")
   theme(legend.position="bottom")
 
 
