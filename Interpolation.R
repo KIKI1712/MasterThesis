@@ -1,4 +1,4 @@
-
+setwd("C:/Users/User/teza")
 ###SPLINE INTERPOLATION
 library(ggplot2)
 library(readxl)
@@ -13,7 +13,7 @@ sales_data_spline <- read_xlsx("fake_sales_data.xlsx")
 sales_data_spline$Sales[sales_data_spline$Sales == 0] <- NA
 
 # Use na.spline() to fill in the missing values using spline interpolation
-sales_data_spline$Sales <- na.spline(ts(sales_data_spline$Sales))
+sales_data_spline$Sales <- na.spline(ts(sales_data_spline$Sales), na.rm = FALSE)
 
 #round data 
 sales_data_spline$Sales <- round(sales_data_spline$Sales)
@@ -28,7 +28,7 @@ monthly_sales <- sales_data_spline %>%
   arrange(Date)
 
 monthly_sales <- data.frame(monthly_sales)
-monthly_sales$MonthYear <- as.Date(sales_data_spline$Date)
+monthly_sales$Date <- as.Date(sales_data_spline$Date)
 # Plot the graph
 ggplot(monthly_sales, aes(x = Date, y = TotalSales, group = 1)) +
   geom_line(color = "steelblue", size = 1, alpha = 0.8) +
@@ -81,7 +81,7 @@ for (degree in 1:27) {
 }
 print(paste("Best Degree:", best_degree))
 print(paste("Best AIC:", best_aic))
-#Best polynomial for our example is 8
+#Best polynomial for our example is 26
 
 # Fit a polynomial regression model to the non-NA data
 model <- lm(Sales ~ poly(Days, 26), data = sales_data_polynomial, na.action = na.exclude)
@@ -110,7 +110,7 @@ sales_data_withNA <- read_xlsx("fake_sales_data.xlsx")
 sales_data_withNA$Sales[sales_data_withNA$Sales == 0] <- NA
 
 #Plotting the graph 
-Date <- sales_data$Date
+Date <- sales_data_withNA$Date
 
 
 data_for_plot_deterministicINT <- data.frame(
@@ -130,9 +130,9 @@ data_only_interpolated <- data_for_plot_deterministicINT %>%
 
 ggplot(data_only_interpolated, aes(x = Date)) +
   geom_line(aes(y = polynomial_interpolation, color = "Polynomial Interpolation")) +
-  geom_line(aes(y = spline_interpolation, color = "Spline Interpolation")) +
+  geom_line(aes(y = spline_interpolation, color = "Cubic Spline Interpolation")) +
   theme_minimal() +
-  labs(color = "Method") + ylab("Sales") + ggtitle("Polynomial vs. Spline interpolation")
+  labs(color = "Method") + ylab("Sales") + ggtitle("Polynomial vs. Cubic Spline interpolation")
 theme(legend.position="bottom")
 
 
