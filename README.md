@@ -19,8 +19,8 @@ The generated sales data reflects an increasing trend over the years, alongside 
 #### After applying the first sales approximation technique "Average of last known periods", we can see a significant change in data:
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/41256335-12b4-4539-8f17-c570d74b9a20)
 
-#### Second sales approximation technique "Deterministic interpolation": 
-I have now applied two models of deterministic interpolation: Classic polynomial interpolation and Spline interpolation: Interestingly, they both yield similar results, mostly due to the high degree of polynomials, which was determined by the loop function that I created in R (you can see more in deterministic_interpolation.R file). A higher-degree polynomial can capture local variations in the data better, making it more similar to spline interpolation, which is “local” by nature, meaning that it is designed to capture local variations by fitting separate polynomials to different segments of the data.
+#### Second sales approximation technique "Interpolation": 
+I have now applied two models of interpolation: Classic polynomial interpolation and Spline interpolation: Interestingly, they both yield similar results, mostly due to the high degree of polynomials, which was determined by the loop function that I created in R (you can see more in deterministic_interpolation.R file). A higher-degree polynomial can capture local variations in the data better, making it more similar to spline interpolation, which is “local” by nature, meaning that it is designed to capture local variations by fitting separate polynomials to different segments of the data.
 
 ![image](https://github.com/KIKI1712/MasterThesis/assets/82513917/d71dafb3-bfc0-4aa9-ac27-2735a7e1b996)
 
