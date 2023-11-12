@@ -20,7 +20,7 @@ The generated sales data reflects an increasing trend over the years, alongside 
 <img src="https://github.com/KIKI1712/MasterThesis/assets/82513917/bb5d7b8d-ea14-4d62-88f5-be3fc164ca96" width="600" height="600">
 
 #### Second sales approximation technique "Interpolation": 
-I have now applied two models of interpolation: Classic polynomial interpolation and Spline interpolation: Interestingly, they both yield similar results, mostly due to the high degree of polynomials, which was determined by the loop function that I created in R (you can see more in deterministic_interpolation.R file). A higher-degree polynomial can capture local variations in the data better, making it more similar to spline interpolation, which is “local” by nature, meaning that it is designed to capture local variations by fitting separate polynomials to different segments of the data.
+I have now applied two models of interpolation: Classic polynomial interpolation and Spline interpolation: Interestingly, they both yield similar results, mostly due to the high degree of polynomials, which was determined by the loop function that I created in R (you can see more in interpolation.R file). A higher-degree polynomial can capture local variations in the data better, making it more similar to spline interpolation, which is “local” by nature, meaning that it is designed to capture local variations by fitting separate polynomials to different segments of the data.
 
 <img src="https://github.com/KIKI1712/MasterThesis/assets/82513917/d71dafb3-bfc0-4aa9-ac27-2735a7e1b996" width="600" height="600">
 
