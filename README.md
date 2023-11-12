@@ -40,7 +40,7 @@ After applying six different imputation methods, different results were obtained
 
 ### Comparison of forecast accuracy between least and most accurate approximation technique
 
-<img src="https://github.com/KIKI1712/MasterThesis/assets/82513917/1c1d9e91-cb4a-46bf-b013-54ba282e8db5" width="600" height="600">
+<img src="https://github.com/KIKI1712/MasterThesis/assets/82513917/bda0b038-154a-43f7-bbdc-57f1fb91236b" width="600" height="600">
 
 
 In the practical part of this master's thesis, my objective was to demonstrate the process of effectively predicting demand based on sales data, particularly in instances of stockouts. We successfully implemented several approximation techniques and then we applied some forecasting techniques to those “fixed” data. All of them showed really good results.
