@@ -7,9 +7,9 @@ library(dplyr)
 library(lubridate)
 library(zoo)
 library(forecast)
-sales_data_spline <- read_xlsx("fake_sales_data.xlsx")
+#sales_data_spline <- read_xlsx("fake_sales_data.xlsx")
+sales_data_spline <- read_xlsx("fake_data_m5.xlsx")
 
-# Replace zeros with NA
 sales_data_spline$Sales[sales_data_spline$Sales == 0] <- NA
 
 # Use na.spline() to fill in the missing values using spline interpolation
@@ -28,7 +28,8 @@ monthly_sales <- sales_data_spline %>%
   arrange(Date)
 
 monthly_sales <- data.frame(monthly_sales)
-monthly_sales$Date <- as.Date(sales_data_spline$Date)
+monthly_sales$Date <- as.Date(monthly_sales$Date)
+
 # Plot the graph
 ggplot(monthly_sales, aes(x = Date, y = TotalSales, group = 1)) +
   geom_line(color = "steelblue", size = 1, alpha = 0.8) +
@@ -50,17 +51,16 @@ library(dplyr)
 library(lubridate)
 library(zoo)
 library(forecast)
-library()
-sales_data_polynomial <- read_xlsx("fake_sales_data.xlsx")
-
+#sales_data_polynomial <- read_xlsx("fake_sales_data.xlsx")
+sales_data_polynomial <- read_xlsx("fake_data_m5.xlsx")
 # Replace zeros with NA
 sales_data_polynomial$Sales[sales_data_polynomial$Sales == 0] <- NA
 
-# Create a new column Days which will be used for the interpolation (used as predictor variable in the model)
+# Create a new column Days which will be used for the interpolation 
 sales_data_polynomial$Days <- 1:nrow(sales_data_polynomial)
 #convert to time series
 sales_data_polynomial$Sales <- ts(sales_data_polynomial$Sales)
-#Firstly, we need to decide on degree of polynomial which we will use. We do it in following way:
+#Firstly, we need to decide on degree of polynomial which we will use.in following way:
 # Initialize variables to store the results
 best_degree <- 0
 best_aic <- Inf
@@ -83,16 +83,16 @@ print(paste("Best Degree:", best_degree))
 print(paste("Best AIC:", best_aic))
 #Best polynomial for our example is 26
 
-# Fit a polynomial regression model to the non-NA data
+#Fit a polynomial regression model to the non-NA data
 model <- lm(Sales ~ poly(Days, 26), data = sales_data_polynomial, na.action = na.exclude)
 
-# Predict the sales using the fitted model
+#Predict the sales using the fitted model
 sales_data_polynomial$Predicted_Sales <- predict(model, sales_data_polynomial)
 
-# Replace the NA values in the Sales column with the predicted values
+#Replace the NA values in the Sales column with the predicted values
 sales_data_polynomial$Sales[is.na(sales_data_polynomial$Sales)] <- sales_data_polynomial$Predicted_Sales[is.na(sales_data_polynomial$Sales)]
 
-# Remove the Predicted_Sales column
+#Remove the Predicted_Sales column
 sales_data_polynomial$Predicted_Sales <- NULL
 
 #round Data
@@ -100,12 +100,13 @@ sales_data_polynomial$Sales <- round(sales_data_polynomial$Sales)
 print(sales_data_polynomial)
 
 
-## Compare the results
+##Compare the results
 sales_data_polynomial$Days <- NULL
 
 # Create a new data frame that combines both 'sales_data_polynomial' and 'sales_data_spline'
 #add column with missing values
-sales_data_withNA <- read_xlsx("fake_sales_data.xlsx")
+#sales_data_withNA <- read_xlsx("fake_sales_data.xlsx")
+sales_data_withNA <- read_xlsx("fake_data_m5.xlsx")
 # Replace zeros with NA
 sales_data_withNA$Sales[sales_data_withNA$Sales == 0] <- NA
 
@@ -120,7 +121,7 @@ data_for_plot_deterministicINT <- data.frame(
   spline_interpolation = ts(sales_data_spline$Sales)
 )
 
-# Convert Date to a Date object, if it's not already
+
 data_for_plot_deterministicINT$Date <- as.Date(data_for_plot_deterministicINT$Date)
 
 
@@ -128,12 +129,61 @@ data_for_plot_deterministicINT$Date <- as.Date(data_for_plot_deterministicINT$Da
 data_only_interpolated <- data_for_plot_deterministicINT %>%
   filter(is.na(sales_data_withNA)) 
 
-ggplot(data_only_interpolated, aes(x = Date)) +
-  geom_line(aes(y = polynomial_interpolation, color = "Polynomial Interpolation")) +
-  geom_line(aes(y = spline_interpolation, color = "Cubic Spline Interpolation")) +
+
+ggplot(data_for_plot_deterministicINT, aes(x = Date)) +
+  geom_line(aes(y = polynomial_interpolation, color = "Polynomial Interpolation"), size = 1, alpha = 0.8) +
+  geom_point(aes(y = polynomial_interpolation), color = alpha("steelblue", 0.5), size = 2, alpha = 0.6) +
+  geom_line(aes(y = spline_interpolation, color = "Cubic Spline Interpolation"), size = 1, alpha = 0.8) +
+  geom_point(aes(y = spline_interpolation), color = alpha("red", 0.5), size = 2, alpha = 0.6) +
+  scale_color_manual(values = c("Polynomial Interpolation" = "steelblue", "Cubic Spline Interpolation" = "red")) +
+  labs(color = "Legend") + ylab("Approximated demand")  +
   theme_minimal() +
-  labs(color = "Method") + ylab("Sales") + ggtitle("Polynomial vs. Cubic Spline interpolation")
-theme(legend.position="bottom")
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1),   # Adjusting x-axis labels for readability
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.position = "bottom") +
+  scale_x_date(breaks = seq(min(data_only_interpolated$Date), max(data_only_interpolated$Date), by = "6 months"))
+
+
+
+
+# Convert Date to Date format
+data_for_plot_deterministicINT$Date <- ymd(data_for_plot_deterministicINT$Date)
+data_for_plot_deterministicINT$actual_sales <- sales_data_withNA$Sales
+
+#take withouth final year
+data_for_plot_deterministicINT <- data_for_plot_deterministicINT[1:1461, ]
+# Group by month and summarize
+monthly_summary <- data_for_plot_deterministicINT %>%
+  mutate(Month = floor_date(Date, "month")) %>%
+  group_by(Month) %>%
+  summarise(
+    sales_data_withNA = sum(sales_data_withNA, na.rm = TRUE),
+    polynomial_interpolation = sum(polynomial_interpolation, na.rm = TRUE),
+    spline_interpolation = sum(spline_interpolation, na.rm = TRUE),
+    actual_sales = sum(actual_sales, na.rm = TRUE)
+  )
+
+ggplot(monthly_summary, aes(x = Month)) +
+  geom_line(aes(y = polynomial_interpolation, color = "Polynomial Interpolation"), size = 1, alpha = 0.8) +
+  geom_point(aes(y = polynomial_interpolation), color = alpha("steelblue", 0.5), size = 2, alpha = 0.6) +
+  geom_line(aes(y = spline_interpolation, color = "Cubic Spline Interpolation"), linetype = "dashed",size = 1, alpha = 0.8) +
+  geom_point(aes(y = spline_interpolation), color = alpha("blue", 0.5), size = 2, alpha = 0.6) +
+  geom_line(aes(y = actual_sales, color = "Actual Sales"), size = 1, alpha = 0.8) +
+  geom_point(aes(y = actual_sales), color = alpha("red", 0.5), size = 2, alpha = 0.6) +
+  scale_color_manual(values = c("Polynomial Interpolation" = "steelblue", "Cubic Spline Interpolation" = "blue", "Actual Sales" = "red")) +
+  labs(color = "Legend") + ylab("Approximated demand vs. Actual Sales")  + xlab("Date") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1),   # Adjusting x-axis labels for readability
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        legend.position = "bottom") +
+  scale_x_date(breaks = seq(min(data_only_interpolated$Date), max(data_only_interpolated$Date), by = "6 months"))
+
+
+
 
 
 #### another way to plot
